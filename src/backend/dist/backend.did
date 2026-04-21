@@ -1,0 +1,157 @@
+type UserRole = 
+ variant {
+   admin;
+   candidate;
+ };
+type UserPublic = 
+ record {
+   email: text;
+   fullname: text;
+   id: UserId;
+   role: UserRole;
+ };
+type UserId = nat;
+type Timestamp = int;
+type SessionStatus = 
+ variant {
+   autoSubmitted;
+   inProgress;
+   submitted;
+ };
+type SessionId = nat;
+type RegistrationResult = 
+ variant {
+   err: record {message: text;};
+   ok: record {generatedPassword: text;};
+ };
+type QuestionId = nat;
+type Question = 
+ record {
+   aiGenerated: bool;
+   correctAnswer: text;
+   difficulty: Difficulty;
+   examId: ExamId;
+   id: QuestionId;
+   options: vec text;
+   questionText: text;
+ };
+type ProctoringEventType = 
+ variant {
+   autoSubmit;
+   cameraFrame;
+   noiseBreach;
+   tabSwitch;
+ };
+type ProctoringEventCounts = 
+ record {
+   framesCaptured: nat;
+   noiseEvents: nat;
+   tabSwitches: nat;
+ };
+type OllamaGenerationResult = 
+ variant {
+   err: text;
+   ok: vec Question;
+ };
+type LoginResult = 
+ variant {
+   err: record {
+          lockedUntilSecs: opt int;
+          message: text;
+        };
+   ok: record {
+         role: UserRole;
+         sessionToken: text;
+         userId: UserId;
+       };
+ };
+type ExamStatus = 
+ variant {
+   active;
+   closed;
+   draft;
+ };
+type ExamSessionPublic = 
+ record {
+   candidateId: UserId;
+   endTime: opt Timestamp;
+   examId: ExamId;
+   id: SessionId;
+   startTime: Timestamp;
+   status: SessionStatus;
+ };
+type ExamResult = 
+ record {
+   passed: bool;
+   perDifficultyBreakdown: DifficultyBreakdown;
+   proctoringEventCounts: ProctoringEventCounts;
+   timeTakenSecs: nat;
+   totalCorrect: nat;
+   totalQuestions: nat;
+ };
+type ExamPublic = 
+ record {
+   createdAt: Timestamp;
+   id: ExamId;
+   passThresholdPercent: nat;
+   roleTitle: text;
+   status: ExamStatus;
+   timerMinutes: nat;
+ };
+type ExamId = nat;
+type EventId = nat;
+type DifficultyBreakdown = 
+ record {
+   easy: nat;
+   expert: nat;
+   hard: nat;
+   medium: nat;
+ };
+type Difficulty = 
+ variant {
+   easy;
+   expert;
+   hard;
+   medium;
+ };
+service : {
+  addQuestion: (sessionToken: text, examId: ExamId, questionText: text,
+   difficulty: Difficulty, options: vec text, correctAnswer: text,
+   aiGenerated: bool) -> (QuestionId);
+  cleanupOldCameraFrames: (sessionToken: text) -> (nat);
+  createExam: (sessionToken: text, roleTitle: text, timerMinutes: nat,
+   passThresholdPercent: nat) -> (ExamId);
+  generateQuestionsViaOllama: (sessionToken: text, examId: ExamId, role:
+   text) -> (OllamaGenerationResult);
+  getCurrentUser: (sessionToken: text) -> (opt UserPublic) query;
+  getExam: (sessionToken: text, examId: ExamId) -> (opt ExamPublic) query;
+  getExamResult: (sessionToken: text, sessionId: SessionId) ->
+   (opt ExamResult) query;
+  getUserCount: () -> (nat) query;
+  importQuestions: (sessionToken: text, examId: ExamId, qs:
+   vec record {
+         text;
+         Difficulty;
+         vec text;
+         text;
+       }) -> (nat);
+  listExams: (sessionToken: text) -> (vec ExamPublic) query;
+  listQuestions: (sessionToken: text, examId: ExamId) -> (vec Question) query;
+  listSessions: (sessionToken: text, examId: opt ExamId) ->
+   (vec ExamSessionPublic) query;
+  logProctoringEvent: (sessionToken: text, sessionId: SessionId, eventType:
+   ProctoringEventType, metadata: text) -> (EventId);
+  login: (email: text, password: text) -> (LoginResult);
+  logout: (sessionToken: text) -> ();
+  register: (fullname: text, email: text) -> (RegistrationResult);
+  setExamStatus: (sessionToken: text, examId: ExamId, status: ExamStatus) ->
+   (bool);
+  startSession: (sessionToken: text, examId: ExamId) -> (SessionId);
+  storeCameraFrame: (sessionToken: text, sessionId: SessionId, storageId:
+   text, timestamp: int) -> (EventId);
+  submitSession: (sessionToken: text, sessionId: SessionId, answerList:
+   vec record {
+         QuestionId;
+         text;
+       }, autoSubmit: bool) -> (ExamResult);
+}

@@ -1,0 +1,21 @@
+{
+  "overview": "A full-stack proctored hiring exam platform. Candidates register, receive credentials, and take a timed technical exam under automated monitoring — camera capture, mic noise detection, and tab-switch tracking. Admins configure exams, upload questions via Excel, or generate them using AI. After submission, a detailed scoreboard shows scores, proctoring events, and pass/fail status.",
+  "features": [
+    "Candidate registration with auto-generated password displayed on screen",
+    "Secure login with 5-minute lockout after 3 failed attempts",
+    "Proctoring: camera frame capture every 10s, mic noise detection, tab-switch auto-submit",
+    "Admin exam setup: Excel question upload and Ollama AI question generation",
+    "Configurable timed exam with auto-submit on timeout",
+    "Detailed scoreboard with per-difficulty breakdown, proctoring flags, and pass/fail indicator"
+  ],
+  "category": "productivity",
+  "tags": [
+    "hiring",
+    "proctoring",
+    "exam",
+    "recruitment",
+    "ai",
+    "monitoring"
+  ],
+  "last_updated": "2026-04-21T09:28:22.401Z"
+}

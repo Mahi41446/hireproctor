@@ -1,0 +1,166 @@
+// Version: 1.0.0
+type AnswerId__847472744 = Nat;
+type Answer__444664641 =
+  {
+    id : AnswerId__847472744;
+    isCorrect : Bool;
+    questionId : QuestionId__77764146;
+    sessionId : SessionId__1052913375;
+    userAnswer : Text
+  };
+type Data__791452850<K, V> =
+  {var count : Nat__490723111; kvs : [var ?(K, V)]};
+type DifficultyBreakdown__553757500 =
+  {easy : Nat; expert : Nat; hard : Nat; medium : Nat};
+type Difficulty__221667509 = {#easy; #expert; #hard; #medium};
+type EventId__361868567 = Nat;
+type ExamId__379139927 = Nat;
+type ExamResult__339153292 =
+  {
+    passed : Bool;
+    perDifficultyBreakdown : DifficultyBreakdown__553757500;
+    proctoringEventCounts : ProctoringEventCounts__216239939;
+    timeTakenSecs : Nat;
+    totalCorrect : Nat;
+    totalQuestions : Nat
+  };
+type ExamSession__716142497 =
+  {
+    candidateId : UserId__158757552;
+    var endTime : ?Timestamp__301639476;
+    examId : ExamId__379139927;
+    id : SessionId__1052913375;
+    startTime : Timestamp__301639476;
+    var status : SessionStatus__1071591422
+  };
+type ExamStatus__766801299 = {#active; #closed; #draft};
+type Exam__262601914 =
+  {
+    createdAt : Timestamp__301639476;
+    id : ExamId__379139927;
+    passThresholdPercent : Nat;
+    roleTitle : Text;
+    var status : ExamStatus__766801299;
+    timerMinutes : Nat
+  };
+type HttpHeader__1018038367 = {name : Text; value : Text};
+type HttpRequest__897234706 =
+  {
+    body : ?Blob;
+    headers : [HttpHeader__1018038367];
+    max_response_bytes : ?Nat64;
+    method : {#get; #head; #post};
+    transform :
+      ?{
+         context : Blob;
+         function :
+           shared query TransformArgs__319074341 ->
+             async HttpResponse__31281974
+       };
+    url : Text
+  };
+type HttpResponse__31281974 =
+  {body : Blob; headers : [HttpHeader__1018038367]; status : Nat};
+type Internal__8484328<K, V> =
+  {children : [var ?Node__46230540<K, V>]; data : Data__791452850<K, V>};
+type Leaf__809889148<K, V> = {data : Data__791452850<K, V>};
+type Nat__490723111 = Nat__920180692;
+type Nat__920180692 = Nat;
+type Node__46230540<K, V> =
+  {#internal : Internal__8484328<K, V>; #leaf : Leaf__809889148<K, V>};
+type ProctoringEventCounts__216239939 =
+  {framesCaptured : Nat; noiseEvents : Nat; tabSwitches : Nat};
+type ProctoringEventType__31855616 =
+  {#autoSubmit; #cameraFrame; #noiseBreach; #tabSwitch};
+type ProctoringEvent__930066417 =
+  {
+    eventType : ProctoringEventType__31855616;
+    id : EventId__361868567;
+    metadata : Text;
+    sessionId : SessionId__1052913375;
+    timestamp : Timestamp__301639476
+  };
+type QuestionId__77764146 = Nat;
+type Question__438287464 =
+  {
+    aiGenerated : Bool;
+    correctAnswer : Text;
+    difficulty : Difficulty__221667509;
+    examId : ExamId__379139927;
+    id : QuestionId__77764146;
+    options : [Text];
+    questionText : Text
+  };
+type SessionId__1052913375 = Nat;
+type SessionStatus__1071591422 = {#autoSubmitted; #inProgress; #submitted};
+type Timestamp__301639476 = Int;
+type TransformArgs__319074341 =
+  {context : Blob; response : HttpResponse__31281974};
+type UserId__158757552 = Nat;
+type UserRole__758726964 = {#admin; #candidate};
+type User__562639855 =
+  {
+    createdAt : Timestamp__301639476;
+    email : Text;
+    var failedLoginAttempts : Nat;
+    fullname : Text;
+    hashedPassword : Text;
+    id : UserId__158757552;
+    var lockedUntil : ?Timestamp__301639476;
+    role : UserRole__758726964
+  };
+actor {
+  stable IC :
+    actor {
+      http_request :
+        shared HttpRequest__897234706 -> async HttpResponse__31281974
+    };
+  stable answersMap :
+    {
+      var root : Node__46230540<Nat, Answer__444664641>;
+      var size : Nat__490723111
+    };
+  stable examMap :
+    {
+      var root : Node__46230540<Nat, Exam__262601914>;
+      var size : Nat__490723111
+    };
+  stable examResults :
+    {
+      var root : Node__46230540<Nat, ExamResult__339153292>;
+      var size : Nat__490723111
+    };
+  stable examSessions :
+    {
+      var root : Node__46230540<Nat, ExamSession__716142497>;
+      var size : Nat__490723111
+    };
+  stable nextAnswerId : {var value : Nat};
+  stable nextEventId : {var value : Nat};
+  stable nextExamId : {var value : Nat};
+  stable nextQuestionId : {var value : Nat};
+  stable nextSessionId : {var value : Nat};
+  stable nextUserId : {var value : Nat};
+  stable procEvents :
+    {
+      var root : Node__46230540<Nat, ProctoringEvent__930066417>;
+      var size : Nat__490723111
+    };
+  stable questionsMap :
+    {
+      var root : Node__46230540<Nat, Question__438287464>;
+      var size : Nat__490723111
+    };
+  stable sessions :
+    {var root : Node__46230540<Text, Nat>; var size : Nat__490723111};
+  stable users :
+    {
+      var root : Node__46230540<Text, User__562639855>;
+      var size : Nat__490723111
+    };
+  stable usersByNat :
+    {
+      var root : Node__46230540<Nat, User__562639855>;
+      var size : Nat__490723111
+    }
+};
